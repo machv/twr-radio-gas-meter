@@ -1,7 +1,12 @@
 #include <application.h>
 
+// How long should radio listen for messages after boot or a button press
 #define INITIAL_LISTEN_INTERVAL (1 * 60 * 1000)
+
+// How often send periodic meter updates
 #define USAGE_REPORT_INTERVAL (5 * 60 * 1000)
+
+// Defaults
 #define BATTERY_UPDATE_INTERVAL (60 * 60 * 1000)
 #define TEMPERATURE_MEASURE_INTERVAL_SECOND (30)
 #define TEMPERATURE_PUBLISH_DELTA (1.0f)
@@ -26,23 +31,16 @@ void pulse_counter_event_handler(bc_module_sensor_channel_t channel, bc_pulse_co
 
         uint32_t current_counter = bc_pulse_counter_get(BC_MODULE_SENSOR_CHANNEL_A);
         uint32_t relative_counter = current_counter - last_counter;
-        char buffer[16];
 
         // Send absolute usage
         float_t absolute_usage = current_counter / (float_t)100;
         bc_radio_pub_float("usage/-/total", &absolute_usage);
-        memset(buffer, 0, sizeof(buffer));
-        sprintf(buffer, "%0.2f", absolute_usage);
-        bc_radio_pub_string("usage/1/total", buffer);
 
         // Send relative usage only if changed
         //if(relative_counter > 0)
         //{
         float_t relative_usage = relative_counter / (float_t)100;
         bc_radio_pub_float("usage/-/relative", &relative_usage);
-        memset(buffer, 0, sizeof(buffer));
-        sprintf(buffer, "%0.2f", relative_usage);
-        bc_radio_pub_string("usage/1/relative", buffer);
         //}
 
         last_counter = current_counter;
@@ -130,24 +128,39 @@ void button_event_handler(bc_button_t *self, bc_button_event_t event, void *even
 
 void counter_set_handler(uint64_t *id, const char *topic, void *value, void *param)
 {
+    bc_log_info("Set counter triggered [int].");
+
     uint32_t new_counter = *(uint32_t *)value;
     float_t usage = new_counter / (float_t)100;
 
     bc_pulse_counter_set(BC_MODULE_SENSOR_CHANNEL_A, new_counter);
     last_counter = new_counter;
 
-    char buffer[16];
-    memset(buffer, 0, sizeof(buffer));
-    sprintf(buffer, "%0.2f", usage);
-    bc_radio_pub_string("usage/1/total", buffer);
     bc_radio_pub_float("usage/-/total", &usage);
 
     bc_log_info("Usage counter set to %i (%0.2f).", new_counter, usage);
 }
 
-// Subscribe to counter change
+void counter_set_handler_float(uint64_t *id, const char *topic, void *value, void *param)
+{
+    bc_log_info("Set counter triggered [float].");
+
+    float_t usage = *(float_t*)value;
+    uint32_t new_counter = usage * 100;
+
+    bc_pulse_counter_set(BC_MODULE_SENSOR_CHANNEL_A, new_counter);
+    last_counter = new_counter;
+
+    bc_radio_pub_float("usage/-/total", &usage);
+
+    bc_log_info("Usage counter set to %i (%0.2f).", new_counter, usage);
+    
+}
+
+// Subscribe to counter changes
 bc_radio_sub_t subs[] = {
     {"usage/-/total/set", BC_RADIO_SUB_PT_INT, counter_set_handler, NULL},
+    {"usage/-/total/setfloat", BC_RADIO_SUB_PT_FLOAT, counter_set_handler_float, NULL},
 };
 
 void application_init(void)
