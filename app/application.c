@@ -126,7 +126,7 @@ void button_event_handler(bc_button_t *self, bc_button_event_t event, void *even
     }
 }
 
-void counter_set_handler(uint64_t *id, const char *topic, void *value, void *param)
+void counter_set_handler_int(uint64_t *id, const char *topic, void *value, void *param)
 {
     bc_log_info("Set counter triggered [int].");
 
@@ -154,13 +154,12 @@ void counter_set_handler_float(uint64_t *id, const char *topic, void *value, voi
     bc_radio_pub_float("usage/-/total", &usage);
 
     bc_log_info("Usage counter set to %i (%0.2f).", new_counter, usage);
-    
 }
 
 // Subscribe to counter changes
 bc_radio_sub_t subs[] = {
-    {"usage/-/total/set", BC_RADIO_SUB_PT_INT, counter_set_handler, NULL},
-    {"usage/-/total/setfloat", BC_RADIO_SUB_PT_FLOAT, counter_set_handler_float, NULL},
+    {"usage/-/total/float", BC_RADIO_SUB_PT_FLOAT, counter_set_handler_float, NULL},
+    {"usage/-/total/set", BC_RADIO_SUB_PT_INT, counter_set_handler_int, NULL},
 };
 
 void application_init(void)
