@@ -4,7 +4,7 @@
 #define INITIAL_LISTEN_INTERVAL (1 * 60 * 1000)
 
 // How often send periodic meter updates
-#define USAGE_REPORT_INTERVAL (5 * 60 * 1000)
+#define USAGE_REPORT_INTERVAL (30 * 60 * 1000)
 
 // Defaults
 #define BATTERY_UPDATE_INTERVAL (60 * 60 * 1000)
