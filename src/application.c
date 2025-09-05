@@ -197,7 +197,7 @@ void application_init(void)
     // Register task to notify end of listening
     listening_stopped_task_id = twr_scheduler_register(listening_stopped_handler, NULL, TWR_TICK_INFINITY);
 
-    twr_radio_pairing_request("gas-meter", VERSION);
+    twr_radio_pairing_request("gas-meter", FW_VERSION);
 
     // Wait for optional counter configuration
     start_listening();
