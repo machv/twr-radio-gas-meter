@@ -182,53 +182,21 @@ cards:
   - type: entities
     title: Gas meter
     entities:
+      - entity: sensor.gas_usage_komorany
       - entity: input_text.gas_meter_new_value
-        name: Meter reading
-      - type: button
-        name: Send reading
-        action_name: Set
-        tap_action:
-          action: perform-action
-          perform_action: script.set_gas_meter_value
-          confirmation:
-            text: Send the entered reading to the gas meter?
-
+      - entity: script.set_gas_meter_reading
   - type: markdown
-    content: >-
-      **Status:** {{ states('input_text.gas_meter_set_status') }}
-
+    content: '**Status:** {{ states(''input_text.gas_meter_set_status'') }}'
   - type: tile
     entity: timer.gas_meter_listening
     name: Time left to set meter
     tap_action:
       action: none
+
 ```
 
 The status is read-only, and the tile shows the live countdown while active and
-Idle afterward. To place the textbox and a narrow Set button side by side, install
-[layout-card](https://github.com/thomasloven/lovelace-layout-card) through HACS and
-replace the entities card above with:
-
-```yaml
-type: custom:layout-card
-layout_type: custom:grid-layout
-layout:
-  grid-template-columns: minmax(0, 1fr) 100px
-  place-items: center stretch
-cards:
-  - type: entities
-    entities:
-      - entity: input_text.gas_meter_new_value
-        name: Meter reading
-  - type: button
-    name: Set
-    show_icon: false
-    tap_action:
-      action: perform-action
-      perform_action: script.set_gas_meter_value
-      confirmation:
-        text: Send the entered reading to the gas meter?
-```
+Idle afterward. 
 
 ### Applying and using the setup
 
